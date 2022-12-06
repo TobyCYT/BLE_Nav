@@ -117,6 +117,15 @@ public class BLEBeacons {
                     if (compareAngle(headingMin, headingMax, heading)){
                         textToSpeech.speak("You have arrived at " + name, TextToSpeech.QUEUE_FLUSH, null, null);
                         lastSpoke = Calendar.getInstance().getTime().getTime();
+                    }else{
+                        Double diff = getDifference(this.heading, heading);// + to right, - to left
+                        if (diff > 45){
+                            textToSpeech.speak("Turn right " + Math.abs(Math.floor(diff)) + "degrees, and you will reach" + name, TextToSpeech.QUEUE_FLUSH, null, null);
+                            lastSpoke = Calendar.getInstance().getTime().getTime();
+                        }else if (diff < -45){
+                            textToSpeech.speak("Turn left " + Math.abs(Math.floor(diff)) + "degrees, and you will reach" + name, TextToSpeech.QUEUE_FLUSH, null, null);
+                            lastSpoke = Calendar.getInstance().getTime().getTime();
+                        }
                     }
                 }
             }
@@ -201,6 +210,11 @@ public class BLEBeacons {
         }
 
         timeOfLastRSSI = Calendar.getInstance().getTime().getTime();
+    }
+
+    public Double getDifference(Double a1, Double a2) {
+        return (((((a1 - a2) % 360) + 540) % 360) - 180);
+        //return Math.min((a1-a2)<0?a1-a2+360:a1-a2, (a2-a1)<0?a2-a1+360:a2-a1);
     }
 
     public boolean compareAngle(Double a, Double b, Double c){
