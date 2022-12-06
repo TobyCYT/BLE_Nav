@@ -11,7 +11,7 @@ public class BLEBeacons {
     String macAddress;
     String filter_mode = "mean";
     String operatingMode = "arrival";// arrival and signage
-    Double heading = null;// heading for +y or arrival heading
+    Double heading;// heading for +y or arrival heading
     String[] Signage = new String[4];// [0] +y, [1] -y, [2] +x, [3] -x
 
     //signals variable
@@ -34,8 +34,6 @@ public class BLEBeacons {
     public void setOperatingMode(String operatingMode) {
         if (operatingMode.equals("arrival") || operatingMode.equals("signage"))
             this.operatingMode = operatingMode;
-        else
-            return;
     }
 
     public Double getFiltered_RSSI() {
@@ -214,7 +212,6 @@ public class BLEBeacons {
 
     public Double getDifference(Double a1, Double a2) {
         return (((((a1 - a2) % 360) + 540) % 360) - 180);
-        //return Math.min((a1-a2)<0?a1-a2+360:a1-a2, (a2-a1)<0?a2-a1+360:a2-a1);
     }
 
     public boolean compareAngle(Double a, Double b, Double c){
