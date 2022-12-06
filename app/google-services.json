@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "663470247574",
+    "firebase_url": "https://bluetooth-test-app-mab-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "bluetooth-test-app-mab",
+    "storage_bucket": "bluetooth-test-app-mab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:663470247574:android:41fc1fc681e0bcc8963cb7",
+        "android_client_info": {
+          "package_name": "com.MAB.BLE_Nav"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "663470247574-1999n94jcvefmn2b1195tmrrb7qphiiq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTyxP0BJ6Cb8ErQFKDMu2mOvwHYHW8trQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "663470247574-1999n94jcvefmn2b1195tmrrb7qphiiq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

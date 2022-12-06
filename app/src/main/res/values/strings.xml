@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">BLE Nav</string>
+    <string name="setup_beacons">Setup Beacons</string>
+    <string name="start_navigation">Start Navigation</string>
+    <string name="_2_beacon_setup_1_dimension">2 Beacon Setup\n(1 Dimension)</string>
+    <string name="_3_beacon_setup_2_dimension">3 Beacon Setup\n(2 Dimension)</string>
+</resources>
