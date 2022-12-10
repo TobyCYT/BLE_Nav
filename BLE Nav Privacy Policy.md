@@ -13,7 +13,7 @@ https://github.com/TobyCYT/BLE_Nav/blob/main/app/src/main/AndroidManifest.xml
 | Permission | Why it is required                                                                                                        |
 | :---: |---------------------------------------------------------------------------------------------------------------------------|
 | `android.permission.BLUETOOTH` | Required for app to function properly, this app uses Bluetooth Low Energy Signals to operate.                             |
-| `android.permission.BLUETOOTH_ADMIN`| Required for initiate device discovery.                                                                                   |
+| `android.permission.BLUETOOTH_ADMIN`| Required for app to initiate device discovery.                                                                            |
 | `android.permission.BLUETOOTH_SCAN` | Allows for app to look for Bluetooth Low Energy Signals.                                                                  |
 | `android.permission.ACCESS_FINE_LOCATION` | On Android 11 and lower, a Bluetooth scan could potentially be used to gather information about the location of the user. |
 | `android.permission.ACCESS_COARSE_LOCATION` | On Android 9 and lower, use ACCESS_COARSE_LOCATION permission instead of the ACCESS_FINE_LOCATION permission.             |
