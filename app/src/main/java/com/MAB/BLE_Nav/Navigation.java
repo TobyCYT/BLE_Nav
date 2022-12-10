@@ -100,9 +100,13 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
         });
 
         db = FirebaseDatabase.getInstance("https://bluetooth-test-app-mab-default-rtdb.asia-southeast1.firebasedatabase.app/");
+        try{
+            db.setPersistenceEnabled(true);
+        }catch (Exception e){
+            Log.v("error", e.toString());
+        }
         ref = db.getReference("Beacon Config Database");
-        //ptr = ref.child("B1");
-        //ptr.setValue("First beacon in DB.");
+        ref.keepSynced(true);
 
         childEventListener = new ChildEventListener() {
             @Override
@@ -225,6 +229,7 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
             Intent intent = new Intent(Navigation.this, StartupPage.class);
             startActivity(intent);
             ref.removeEventListener(childEventListener);
+            finish();
         });
 
         list.add("Heading: ");
