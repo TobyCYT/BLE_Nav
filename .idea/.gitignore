@@ -4,3 +4,5 @@
 
 # Exclude all xml from .idea dir
 /*.xml
+
+release/
