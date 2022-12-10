@@ -214,7 +214,7 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.w("Test", "postComments:onCancelled", databaseError.toException());
+                Log.v("Test", "postComments:onCancelled", databaseError.toException());
                 Toast.makeText(getApplicationContext(), "Failed to load comments.",
                         Toast.LENGTH_SHORT).show();
             }

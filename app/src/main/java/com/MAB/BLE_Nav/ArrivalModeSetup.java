@@ -114,7 +114,7 @@ public class ArrivalModeSetup extends AppCompatActivity implements SensorEventLi
                 Intent intent = new Intent(ArrivalModeSetup.this, SetupSelection.class);
                 startActivity(intent);
             } else {
-                showWarning("Please make sure name, threshold and beacon are valid.");
+                showWarning("Please make sure name, threshold and beacon are valid.", "normal");
                 return;
             }
             stopScanning();
@@ -188,8 +188,8 @@ public class ArrivalModeSetup extends AppCompatActivity implements SensorEventLi
         });
     }
 
-    public void showWarning(String msg){
-        DialogFragment popup = new WarningMessage(msg);
+    public void showWarning(String msg, String mode){
+        DialogFragment popup = new WarningMessage(msg, mode);
         popup.show(getSupportFragmentManager(), "Warning to user" );
     }
 

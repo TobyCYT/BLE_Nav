@@ -127,7 +127,7 @@ public class SignageModeSetup extends AppCompatActivity implements SensorEventLi
                 Intent intent = new Intent(SignageModeSetup.this, SetupSelection.class);
                 startActivity(intent);
             } else {
-                showWarning("Please make sure name, threshold, beacon and signages are valid.");
+                showWarning("Please make sure name, threshold, beacon and signages are valid.", "normal");
                 return;
             }
             stopScanning();
@@ -274,8 +274,8 @@ public class SignageModeSetup extends AppCompatActivity implements SensorEventLi
         headingDisplay.setText("Current Heading: "+ headingValue);
     }
 
-    public void showWarning(String msg){
-        DialogFragment popup = new WarningMessage(msg);
+    public void showWarning(String msg, String mode){
+        DialogFragment popup = new WarningMessage(msg, mode);
         popup.show(getSupportFragmentManager(), "Warning to user" );
     }
 
