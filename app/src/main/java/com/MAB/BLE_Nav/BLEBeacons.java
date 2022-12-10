@@ -1,6 +1,10 @@
 package com.MAB.BLE_Nav;
 
 import android.bluetooth.le.ScanResult;
+import android.content.Context;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
@@ -27,27 +31,6 @@ public class BLEBeacons {
 
     TextToSpeech textToSpeech;
 
-    public void setFilter_mode(String filter_mode) {
-        this.filter_mode = filter_mode;
-    }
-
-    public void setOperatingMode(String operatingMode) {
-        if (operatingMode.equals("arrival") || operatingMode.equals("signage"))
-            this.operatingMode = operatingMode;
-    }
-
-    public Double getFiltered_RSSI() {
-        if (timeDifferenceSinceLastRSSI > 5000){
-            RSSI.clearQueue();
-            if (filter_mode.equals("mean")){
-                filtered_RSSI = RSSI.filtered("mean");
-            }else if(filter_mode.equals("kalman")){
-                filtered_RSSI = RSSI.filtered("kalman");
-            }
-        }
-        return filtered_RSSI;
-    }
-
     BLEBeacons(String name, String addr, Double threshold, Double heading, TextToSpeech textToSpeech){
         this.name = name;
         macAddress = addr;
@@ -68,7 +51,7 @@ public class BLEBeacons {
         RSSI = new CustomQueue(5);
     }
 
-    public void update(ScanResult result, Double heading){
+    public void update(ScanResult result, Double heading, Double pitch, Double roll, Context context){
         try {
             if(result.getDevice().getName() != null) {
                 if (!result.getDevice().getAddress().equals(macAddress)) {
@@ -196,7 +179,17 @@ public class BLEBeacons {
                     backward = Signage[1];
                     break;
             }
-            if (filtered_RSSI >= threshold && now - lastSpoke > 10000){
+            Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            if (-1.2 < pitch && pitch < 0 && compareAngle(345.0, 15.0, roll) || !(filtered_RSSI >= threshold)){
+                v.cancel();
+            }else{
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//deprecated in API 26
+                    v.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE));
+                } else {
+                    v.vibrate(1000);
+                }
+            }
+            if (filtered_RSSI >= threshold && now - lastSpoke > 10000 && -1.2 < pitch && pitch < 0 && compareAngle(345.0, 15.0, roll)){
                 String text = "Reached junction" + name;
                 if (!left.equals(" ")) text += ", turn left to " + left;
                 if (!right.equals(" ")) text += ", turn right to " + right;

@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.database.ChildEventListener;
@@ -31,11 +32,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -61,6 +57,8 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
     TextToSpeech textToSpeech;
 
     double heading;
+    double pitch;
+    double roll;
     List<BLEBeacons> BLEBeacons = new ArrayList<>();
     List<String> list = new ArrayList<>();
 
@@ -110,14 +108,10 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
 
         childEventListener = new ChildEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String previousChildName) {
                 String key = dataSnapshot.getKey();
                 String value = dataSnapshot.getValue(String.class);
                 String keyValuePair = key+"|"+value;
-
-                //Log.v("Test", "onChildAdded:" + key + " " + value);
-
-                //String[] entries = readFromFile(this).split("\n",0);
                 String[] data = keyValuePair.split("\\|", 0);
                 /*
                 [0] - Mac Address
@@ -151,7 +145,7 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, String previousChildName) {
                 String key = dataSnapshot.getKey();
                 String value = dataSnapshot.getValue(String.class);
                 String keyValuePair = key+"|"+value;
@@ -172,7 +166,7 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
                 */
                 for (BLEBeacons b : BLEBeacons){
                     if (b.macAddress.equals(key)){
-                        BLEBeacons.remove(BLEBeacons.indexOf(b));
+                        BLEBeacons.remove(b);
                         if (data[3].equals("arrival")){
                             if (data.length == 5) {
                                 BLEBeacons.add(new BLEBeacons(data[1], data[0], Double.valueOf(data[2]),
@@ -196,19 +190,17 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
                 String key = dataSnapshot.getKey();
                 String value = dataSnapshot.getValue(String.class);
 
                 Log.v("Test", "onChildRemoved:" + key + " " + value);
 
-                for (BLEBeacons b : BLEBeacons) {
-                    if (b.macAddress.equals(key)) BLEBeacons.remove(BLEBeacons.indexOf(b));
-                }
+                BLEBeacons.removeIf(b -> b.macAddress.equals(key));
             }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, String previousChildName) {
                 String key = dataSnapshot.getKey();
                 String value = dataSnapshot.getValue(String.class);
 
@@ -217,7 +209,7 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.v("Test", "postComments:onCancelled", databaseError.toException());
                 Toast.makeText(getApplicationContext(), "Failed to load comments.",
                         Toast.LENGTH_SHORT).show();
@@ -232,7 +224,9 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
             finish();
         });
 
-        list.add("Heading: ");
+        list.add("Heading\t: ");
+        list.add("Pitch\t: ");
+        list.add("Roll\t: ");
     }
 
     @Override
@@ -277,7 +271,7 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
         if(keyCode == KeyEvent.KEYCODE_BACK) {
             stopScanning();
             ref.removeEventListener(childEventListener);
-        };
+        }
         return super.onKeyDown(keyCode, event);
     }
 
@@ -285,15 +279,12 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
     private final ScanCallback leScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            updateOrientationAngles();
             if (BLEBeacons != null){
                 for (BLEBeacons e: BLEBeacons){
-                    e.update(result, heading);
+                    e.update(result, heading, pitch, roll, getApplicationContext());
                 }
             }
             try{
-                list.set(0, "Heading: " + heading);
-
                 if (result.getDevice().getName() == null) return;
                 String name = result.getDevice().getName();
                 String address = result.getDevice().getAddress();
@@ -375,6 +366,7 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
             System.arraycopy(event.values, 0, magnetometerReading,
                     0, magnetometerReading.length);
         }
+        updateOrientationAngles();
     }
 
     // Compute the three orientation angles based on the most recent readings from
@@ -390,11 +382,26 @@ public class Navigation extends AppCompatActivity implements SensorEventListener
 
         // "orientationAngles" now has up-to-date information.
         heading = orientationAngles[0];
+        pitch = orientationAngles[1]; // 0 ~ -1
+        roll = orientationAngles[2]; // +-15degree 345 ~ 15
         if (heading < 0){
             heading = ((2*Math.PI + heading)/(2*Math.PI)) * 360;
         }else{
             heading = (heading/Math.PI) * 180;
         }
+        if (roll < 0){
+            roll = ((2*Math.PI + roll)/(2*Math.PI)) * 360;
+        }else{
+            roll = (roll/Math.PI) * 180;
+        }
+        list.set(0, "Heading\t: " + heading);
+        list.set(1, "Pitch\t: " + pitch);
+        list.set(2, "Roll\t: " + roll);
+        StringBuilder compiler = new StringBuilder();
+        for (String e: list){
+            compiler.append(e).append("\n");
+        }
+        peripheralTextView.setText(compiler.toString());
     }
 
 }

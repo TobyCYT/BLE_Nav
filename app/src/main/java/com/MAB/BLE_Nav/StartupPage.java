@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -85,6 +84,7 @@ public class StartupPage extends AppCompatActivity {
                 Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.VIBRATE,
         };
 
         if(!hasPermissions(context, PERMISSIONS)){
