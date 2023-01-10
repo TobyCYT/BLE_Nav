@@ -52,6 +52,7 @@ public class BLEBeacons {
     }
 
     public void update(ScanResult result, Double heading, Double pitch, Double roll, Context context){
+        // Ignore if Signal has no name or macAddress does not correspond to the current Beacon
         try {
             if(result.getDevice().getName() != null) {
                 if (!result.getDevice().getAddress().equals(macAddress)) {
@@ -61,6 +62,8 @@ public class BLEBeacons {
         }catch (SecurityException e){
             Log.v("error", "Fail to get device names.");
         }
+
+        // Store Previous RSSI reading for future reference
         if (filtered_RSSI != null) prev_filtered_RSSI = filtered_RSSI;
 
         // Calculate time difference between this iteration and last iteration
@@ -75,6 +78,7 @@ public class BLEBeacons {
         latest_RSSI = result.getRssi();
         RSSI.queueEnqueue(latest_RSSI);
 
+        // Apply filter on the RSSI signal
         if (filter_mode.equals("mean")){
             filtered_RSSI = RSSI.filtered("mean");
         }else if(filter_mode.equals("kalman")){
@@ -82,23 +86,35 @@ public class BLEBeacons {
         }
 
         Long now = Calendar.getInstance().getTime().getTime();
-        // What to do when user get close to beacon
+
+        // Arrival mode operations
         if (operatingMode.equals("arrival")){
+            // If user is close to the beacon and user was notified about this over 5 seconds ago.
             if (filtered_RSSI >= threshold && now - lastSpoke > 5000){
+                // If heading is null, the arrival nodes is directionless.
                 if (this.heading == null) {
                     textToSpeech.speak("You have arrived at " + name, TextToSpeech.QUEUE_FLUSH, null, null);
                     lastSpoke = Calendar.getInstance().getTime().getTime();
                 }else{
+                    // If heading is present, the arrival node will navigate the user to turn to a certain direction
+
+                    // Giving the user a +-45 degree buffer when navigating
                     Double headingMin = this.heading - 45;
                     Double headingMax = this.heading + 45;
+
+                    // Normalizing the min max heading to range of 0 - 359
                     if (headingMin < 0) headingMin += 360;
                     if (headingMin >= 360) headingMin -= 360;
                     if (headingMax < 0) headingMax += 360;
                     if (headingMax >= 360) headingMax -= 360;
+
+                    // Current device heading is within the min max heading
                     if (compareAngle(headingMin, headingMax, heading)){
                         textToSpeech.speak("You have arrived at " + name, TextToSpeech.QUEUE_FLUSH, null, null);
                         lastSpoke = Calendar.getInstance().getTime().getTime();
                     }else{
+                        // Current device heading is outside of the min max heading
+
                         Double diff = getDifference(this.heading, heading);// + to right, - to left
                         if (diff > 45){
                             textToSpeech.speak("Turn right " + Math.abs(Math.floor(diff)) + "degrees, and you will reach" + name, TextToSpeech.QUEUE_FLUSH, null, null);
@@ -111,7 +127,10 @@ public class BLEBeacons {
                 }
             }
         }else if(operatingMode.equals("signage")){
+            // Signage mode operations
+
             String facing = null;
+
             //check if facing positive y
             Double headingMin = this.heading - 45;
             Double headingMax = this.heading + 45;
@@ -148,6 +167,7 @@ public class BLEBeacons {
             if (headingMax >= 360) headingMax -= 360;
             if (compareAngle(headingMin, headingMax, heading)) facing = "negative x";
 
+            // Assign the signage to relative direction to the user
             // [0] +y, [1] -y, [2] +x, [3] -x
             String left = "unknown";
             String right = "unknown";
@@ -179,6 +199,8 @@ public class BLEBeacons {
                     backward = Signage[1];
                     break;
             }
+
+            // Vibrate if system is unable to get accurate reading of device heading
             Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
             if (-1.2 < pitch && pitch < 0 && compareAngle(345.0, 15.0, roll) || !(filtered_RSSI >= threshold)){
                 v.cancel();
@@ -189,6 +211,8 @@ public class BLEBeacons {
                     v.vibrate(1000);
                 }
             }
+
+            // If device's orientation can provide accurate heading, tell the user the signages
             if (filtered_RSSI >= threshold && now - lastSpoke > 10000 && -1.2 < pitch && pitch < 0 && compareAngle(345.0, 15.0, roll)){
                 String text = "Reached junction" + name;
                 if (!left.equals(" ")) text += ", turn left to " + left;
@@ -200,6 +224,7 @@ public class BLEBeacons {
             }
         }
 
+        // Record time to keep track of last known signal
         timeOfLastRSSI = Calendar.getInstance().getTime().getTime();
     }
 
