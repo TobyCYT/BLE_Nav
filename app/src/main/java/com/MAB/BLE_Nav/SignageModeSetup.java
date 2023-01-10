@@ -118,12 +118,14 @@ public class SignageModeSetup extends AppCompatActivity implements SensorEventLi
             selection = this.beacon.getSelectedItem().toString().split("\\|", 0);//[0] name, [1] address, [2] rssi
 
             if (beacon != null && !beacon.toString().equals("Please Select Beacon") && !name.isEmpty() && !threshold.isEmpty() && !heading.isEmpty()) {
-                //data = name + "|" + selection[1] + "|" + threshold + "|signage|" + heading + "|"
-                //        + pos_y + "|" + neg_y + "|" + pos_x + "|" + neg_x;//[0] name, [1] mac address, [2] threshold, [3] mode, [4] heading, [5-8] signage
-                //writeToFile(data, this);
+                // Create formatted string for database entry
                 data = name + "|" + threshold + "|signage|" + heading + "|"
                         + pos_y + "|" + neg_y + "|" + pos_x + "|" + neg_x;//[0] name, [1] threshold, [2] mode, [3] heading, [4-7] signage
+
+                // Write to database with Mac Address as key
                 ref.child(selection[1]).setValue(data);
+
+                // Return to Setup Selection
                 Intent intent = new Intent(SignageModeSetup.this, SetupSelection.class);
                 startActivity(intent);
             } else {
@@ -151,6 +153,7 @@ public class SignageModeSetup extends AppCompatActivity implements SensorEventLi
 
                 String entry = name + "|" + address + "|" + rssi;
 
+                // Update beacon selection
                 boolean updated = false;
                 for (String e : list) {
                     String[] tempArray= e.split("\\|", 0);//[0] name, [1] address, [2] rssi
